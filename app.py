@@ -44,7 +44,7 @@ def classify_sentiment_openai(review_text):
 #st.write(df)
 
 uploaded_file=st.file_uploader('upload a review file that you want to analyse',
-                               type=['csv'])
+                               type=["csv"])
 
 # once user uploaded file, then read file
 
@@ -56,13 +56,13 @@ if uploaded_file is not None:
     
     text_columns=reviews_df.select_dtypes(include='object').columns
 
-#if len(text_columns)==0:
- #   st.error('No text column found with customer review files. Check again!')
+    if len(text_columns)==0:
+        st.error('No text column found with customer review files. Check again!')
 
 # show a drop down for columns
-review_column=st.selectbox('Select the column with text review',
-                           text_columns
-)
+        review_column=st.selectbox('Select the column with text review',
+                                text_columns
+        )
 
 # Analysing the sentiments
 
