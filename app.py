@@ -53,10 +53,11 @@ if uploaded_file is not None:
     reviews_df=pd.read_csv(uploaded_file)
 
     #check if data has text column 
+    
     text_columns=reviews_df.select_dtypes(include='object').columns
 
-if len(text_columns)==0:
-    st.error('No text column found with customer review files. Check again!')
+#if len(text_columns)==0:
+ #   st.error('No text column found with customer review files. Check again!')
 
 # show a drop down for columns
 review_column=st.selectbox('Select the column with text review',
