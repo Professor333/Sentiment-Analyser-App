@@ -80,25 +80,25 @@ sentiment_count=reviews_df['Sentiment'].value_counts()
 
 col1,col2,col3=st.columns(3)
 
-with col1:
-    positive_count=sentiment_count.get('Positive',0)
-    st.metric('Positive',positive_count,
-              f"{positive_count /len(reviews_df) *100: .2f}%")
+    with col1:
+        positive_count=sentiment_count.get('Positive',0)
+        st.metric('Positive',positive_count,
+                f"{positive_count /len(reviews_df) *100: .2f}%")
 
-with col2:
-    negative_count=sentiment_count.get('Negative',0)
-    st.metric('Negative',negative_count,f"{negative_count/len(reviews_df) *100: .2f}%")
+    with col2:
+        negative_count=sentiment_count.get('Negative',0)
+        st.metric('Negative',negative_count,f"{negative_count/len(reviews_df) *100: .2f}%")
 
-with col3:
-    neutral_count=sentiment_count.get('Neutral',0)
-    st.metric('Neutral',neutral_count,f"{neutral_count /len(reviews_df) *100: .2f}%")
+    with col3:
+        neutral_count=sentiment_count.get('Neutral',0)
+        st.metric('Neutral',neutral_count,f"{neutral_count /len(reviews_df) *100: .2f}%")
 
-import plotly.express as px
-fig=px.pie(values=sentiment_count.values,
-           names=sentiment_count.index,
-           title='Sentiment Distribution'
-                )
-st.plotly_chart(fig)
+    import plotly.express as px
+    fig=px.pie(values=sentiment_count.values,
+            names=sentiment_count.index,
+            title='Sentiment Distribution'
+                    )
+    st.plotly_chart(fig)
 
 
 
