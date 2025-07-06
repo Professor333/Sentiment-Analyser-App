@@ -66,7 +66,7 @@ if uploaded_file is not None:
 
 # Analysing the sentiments
 
-reviews_df['Sentiment']=reviews_df[review_column].apply(classify_sentiment_openai)
+        reviews_df['Sentiment']=reviews_df[review_column].apply(classify_sentiment_openai)
 
 
 #sentiment distribution
