@@ -60,13 +60,13 @@ if uploaded_file is not None:
         st.error('No text column found with customer review files. Check again!')
 
 # show a drop down for columns
-        review_column=st.selectbox('Select the column with text review',
+review_column=st.selectbox('Select the column with text review',
                                 text_columns
         )
 
 # Analysing the sentiments
 
-        reviews_df['Sentiment']=reviews_df[review_column].apply(classify_sentiment_openai)
+reviews_df['Sentiment']=reviews_df[review_column].apply(classify_sentiment_openai)
 
 
 #sentiment distribution
