@@ -1,18 +1,27 @@
 import streamlit as st
-
-st.title("Customer Review Sentiment Analyser")
-st.markdown("This app analyse the sentiment of customer reviews to gain insights into their opinion.")
-
-
 from openai import OpenAI
 import pandas as pd
+import plotly.express as px
 
-#open ai key input
-openai_apikey=st.sidebar.text_input('enter your open ai key',
-                                   type="password")
+st.title("🥗 Customer Review Sentiment Analyzer")
+st.markdown("This app analyzes the sentiment of customer reviews to gain insights into their opinions.")
+
+# OpenAI API Key input
+openai_api_key = st.sidebar.text_input(
+    "Enter your OpenAI API Key", 
+    type="password", 
+    help="You can find your API key at https://platform.openai.com/account/api-keys"
+)
 
 def classify_sentiment_openai(review_text):
-    client = OpenAI(api_key=openai_apikey)
+    """
+    Classify the sentiment of a customer review using OpenAI's GPT-4o model.
+    Parameters:
+        review_text (str): The customer review text to be classified.
+    Returns:
+        str: The sentiment classification of the review as a single word, "positive", "negative", or "neutral".
+    """
+    client = OpenAI(api_key=openai_api_key)
     prompt = f'''
         Classify the following customer review. 
         State your answer
@@ -36,76 +45,66 @@ def classify_sentiment_openai(review_text):
     return completion.choices[0].message.content
 
 
-#user_input = st.text_input("Enter a customer review ")
-#st.write("The current user review is:", user_input)
+# CSV file uploader
+uploaded_file = st.file_uploader(
+    "Upload a CSV file with restaurant reviews", 
+    type=["csv"])
 
-#reading csv file from users
-#df=pd.read_csv('restaurant_reviews.csv')
-#st.write(df)
+# Once the user uploads a csv file:
+if uploaded_file is not None: 
+    # Read the file
+    reviews_df = pd.read_csv(uploaded_file)
 
-uploaded_file=st.file_uploader('upload a review file that you want to analyse',
-                               type=["csv"])
+    # Check if the data has a text column
+    text_columns = reviews_df.select_dtypes(include="object").columns
 
-# once user uploaded file, then read file
+    if len(text_columns) == 0:
+        st.error("No text columns found in the uploaded file.")
 
-if uploaded_file is not None:
-    # read file
-    reviews_df=pd.read_csv(uploaded_file)
+    # Show a dropdown menu to select the review column
+    review_column = st.selectbox(
+        "Select the column with the customer reviews",
+        text_columns
+    )
 
-    #check if data has text column 
+    # Analyze the sentiment of the selected column
+    reviews_df["sentiment"] = reviews_df[review_column].apply(classify_sentiment_openai)
     
-    text_columns=reviews_df.select_dtypes(include='object').columns
+    # Display the sentiment distribution in metrics in 3 columns: Positive, Negative, Neutral
+    # Make the strings in the sentiment column titled
+    reviews_df["sentiment"] = reviews_df["sentiment"].str.title()
+    sentiment_counts = reviews_df["sentiment"].value_counts()
+    # st.write(reviews_df)
+    # st.write(sentiment_counts)
 
-    if len(text_columns)==0:
-        st.error('No text column found with customer review files. Check again!')
+    # Create 3 columns to display the 3 metrics
+    col1, col2, col3 = st.columns(3)
 
-# show a drop down for columns
-review_column=st.selectbox('Select the column with text review',
-                                text_columns
-        )
-
-# Analysing the sentiments
-
-reviews_df['Sentiment']=reviews_df[review_column].apply(classify_sentiment_openai)
-
-
-#sentiment distribution
-reviews_df['Sentiment']=reviews_df['Sentiment'].str.title()
-sentiment_count=reviews_df['Sentiment'].value_counts()
-#st.write(reviews_df)
-#st.write(sentiment_count)
-
-
-#create 3 columns to display 3 metrics
-
-col1,col2,col3=st.columns(3)
-
-with col1:
-        positive_count=sentiment_count.get('Positive',0)
-        st.metric('Positive',positive_count,
-                f"{positive_count /len(reviews_df) *100: .2f}%")
-
-with col2:
-        negative_count=sentiment_count.get('Negative',0)
-        st.metric('Negative',negative_count,f"{negative_count/len(reviews_df) *100: .2f}%")
-
-with col3:
-        neutral_count=sentiment_count.get('Neutral',0)
-        st.metric('Neutral',neutral_count,f"{neutral_count /len(reviews_df) *100: .2f}%")
-
-import plotly.express as px
-fig=px.pie(values=sentiment_count.values,
-names=sentiment_count.index,
-title='Sentiment Distribution'
-                    )
-st.plotly_chart(fig)
-
-
-
-
-
-
-
-# Example usage
-#st.title('Sentiment')
-#st.write(classify_sentiment_openai(user_input))
+    with col1:
+        # Show the number of positive reviews and the percentage
+        positive_count = sentiment_counts.get("Positive", 0)
+        st.metric("Positive", 
+                  positive_count, 
+                  f"{positive_count / len(reviews_df) * 100:.2f}%")
+    
+    with col2:
+        # Show the number of neutral reviews and the percentage
+        neutral_count = sentiment_counts.get("Neutral", 0)
+        st.metric("Neutral", 
+                  neutral_count, 
+                  f"{neutral_count / len(reviews_df) * 100:.2f}%")
+    
+    with col3:
+        # Show the number of negative reviews and the percentage
+        negative_count = sentiment_counts.get("Negative", 0)
+        st.metric("Negative", 
+                  negative_count, 
+                  f"{negative_count / len(reviews_df) * 100:.2f}%")
+        
+    # Display pie chart
+    fig = px.pie(
+        values=sentiment_counts.values, 
+        names=sentiment_counts.index, 
+        title='Sentiment Distribution'
+    )
+    st.plotly_chart(fig)
